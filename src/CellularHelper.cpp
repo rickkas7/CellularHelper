@@ -2,6 +2,8 @@
 
 #include "CellularHelper.h"
 
+#if Wiring_Cellular
+
 CellularHelperClass CellularHelper;
 
 void CellularHelperCommonResponse::logCellularDebug(int type, const char *buf, int len) const {
@@ -811,5 +813,6 @@ int CellularHelperClass::responseCallback(int type, const char* buf, int len, vo
 	return presp->parse(type, buf, len);
 }
 
+#endif /* Wiring_Cellular */
 
 

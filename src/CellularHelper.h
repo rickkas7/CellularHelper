@@ -1,6 +1,8 @@
 #ifndef __CELLULARHELPER_H
 #define __CELLULARHELPER_H
 
+#if Wiring_Cellular
+
 #include "Particle.h"
 
 // Class for quering infromation directly from the ublox SARA modem
@@ -218,5 +220,7 @@ public:
 };
 
 extern CellularHelperClass CellularHelper;
+
+#endif /* Wiring_Cellular */
 
 #endif /* __CELLULARHELPER_H */
