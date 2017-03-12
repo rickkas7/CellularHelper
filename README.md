@@ -181,11 +181,10 @@ This is a demo program that uses the cellular modem to scan for available operat
 
 ```
 3G AT&T 850 MHz 3 bars
-3G AT&T 850 MHz 2 bars
-2G T-Mobile 900 MHz 2 bars
-2G T-Mobile 900 MHz 2 bars
-2G T-Mobile 900 MHz 2 bars
-2G T-Mobile 900 MHz 0 bars
+2G T-Mobile 1800 MHz 2 bars
+2G T-Mobile 1800 MHz 2 bars
+2G T-Mobile 1800 MHz 1 bars
+2G T-Mobile 1800 MHz 1 bars
 ```
 
 It should work even when you can't connect to a tower and also display carriers that are not supported by your SIM. (It only displays carriers compatible with the GSM modem, however, so it won't, for example, display Verizon in the United States since that requires a PCS modem.)

@@ -332,7 +332,9 @@ void CellularHelperEnvironmentCellData::addKeyValue(const char *key, const char 
 	}
 	else
 	if (strcmp(key, "Arfcn") == 0) {
-		arfcn = (int) strtol(value, NULL, 16); // hex
+		// Documentation says this is hex, but this does not appear to be the case!
+		// arfcn = (int) strtol(value, NULL, 16); // hex
+		arfcn = atoi(value);
 	}
 	else
 	if (strcmp(key, "Arfcn_ded") == 0 || strcmp(key, "RxLevSub") == 0 || strcmp(key, "t_adv") == 0) {
@@ -414,20 +416,19 @@ int CellularHelperEnvironmentCellData::getBand() const {
 	}
 	else {
 		// 2G, use arfcn
-
-		if (arfcn >= 0 && arfcn >= 124) {
+		if (arfcn >= 0 && arfcn <= 124) {
 			freq = 900;
 		}
 		else
-		if (arfcn >= 129 && arfcn >= 251) {
+		if (arfcn >= 128 && arfcn <= 251) {
 			freq = 850;
 		}
 		else
-		if (arfcn >= 512 && arfcn >= 885) {
+		if (arfcn >= 512 && arfcn <= 885) {
 			freq = 1800;
 		}
 		else
-		if (arfcn >= 975 && arfcn >= 1024) {
+		if (arfcn >= 975 && arfcn <= 1023) {
 			freq = 900;
 		}
 	}
@@ -464,11 +465,11 @@ String CellularHelperEnvironmentCellData::getBandString() const {
 	}
 	else {
 		// 2G, use arfcn
-		if (arfcn >= 512 && arfcn >= 885) {
+		if (arfcn >= 512 && arfcn <= 885) {
 			band = "DCS 1800";
 		}
 		else
-		if (arfcn >= 975 && arfcn >= 1024) {
+		if (arfcn >= 975 && arfcn <= 1024) {
 			band = "EGSM 900";
 		}
 		else
@@ -479,6 +480,7 @@ String CellularHelperEnvironmentCellData::getBandString() const {
 			band = "2G unknown";
 		}
 	}
+
 
 	return band;
 }
@@ -514,7 +516,7 @@ String CellularHelperEnvironmentCellData::toString() const {
 		return String::format("rat=UMTS %s dlf=%d ulf=%d", common.c_str(), dlf, ulf);
 	}
 	else {
-		return String::format("rat=GSM %s bsic=%x arfcn=%x rxlev=%d", common.c_str(), bsic, arfcn, rxlev);
+		return String::format("rat=GSM %s bsic=%x arfcn=%d rxlev=%d", common.c_str(), bsic, arfcn, rxlev);
 	}
 }
 
