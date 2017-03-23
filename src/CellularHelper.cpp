@@ -465,8 +465,9 @@ String CellularHelperEnvironmentCellData::getBandString() const {
 	}
 	else {
 		// 2G, use arfcn
+
 		if (arfcn >= 512 && arfcn <= 885) {
-			band = "DCS 1800";
+			band = "DCS 1800 or 1900";
 		}
 		else
 		if (arfcn >= 975 && arfcn <= 1024) {

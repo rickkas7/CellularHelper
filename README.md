@@ -180,15 +180,24 @@ The code examples in this document were taken from this example.
 This is a demo program that uses the cellular modem to scan for available operators, frequency band used, and signal strength. It prints a result like this to USB serial:
 
 ```
-3G AT&T 850 MHz 3 bars
-2G T-Mobile 1800 MHz 2 bars
-2G T-Mobile 1800 MHz 2 bars
-2G T-Mobile 1800 MHz 1 bars
-2G T-Mobile 1800 MHz 1 bars
+3G AT&T UMTS 850 2 bars
+3G AT&T UMTS 850 2 bars
+2G T-Mobile DCS 1800 or 1900 2 bars
+2G T-Mobile DCS 1800 or 1900 2 bars
 ```
 
 It should work even when you can't connect to a tower and also display carriers that are not supported by your SIM. (It only displays carriers compatible with the GSM modem, however, so it won't, for example, display Verizon in the United States since that requires a PCS modem.)
 
 This is a very time consuming operation (it can take 2 minutes or longer to run) and it's pretty rarely needed, so it builds on the CellularHelper library but the commands it uses (COPS and COPN) are not part of the library itself because they're so rarely needed.
 
+To build a binary for this, you can download the repository and use the Particle CLI compiler from the top level of it:
 
+```
+particle compile electron examples/2-show-carriers/ --saveTo firmware.bin --target 0.6.0
+```
+
+Then you can flash it to your Electron in DFU mode (blinking yellow):
+
+```
+particle flash --usb firmware.bin
+```

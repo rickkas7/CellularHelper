@@ -230,7 +230,7 @@ void printCellData(CellularHelperEnvironmentCellData *data) {
 
 	const char *operatorName = copnResp.getOperatorName(data->mcc, data->mnc);
 
-	Serial.printlnf("%s %s %d MHz %d bars", whichG, operatorName, data->getBand(), data->getBars());
+	Serial.printlnf("%s %s %s %d bars", whichG, operatorName, data->getBandString().c_str(), data->getBars());
 }
 
 void cellularScan() {
