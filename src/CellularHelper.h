@@ -1,9 +1,10 @@
 #ifndef __CELLULARHELPER_H
 #define __CELLULARHELPER_H
 
+#include "Particle.h"
+
 #if Wiring_Cellular
 
-#include "Particle.h"
 
 // Class for quering infromation directly from the ublox SARA modem
 
