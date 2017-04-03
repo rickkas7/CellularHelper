@@ -2,7 +2,28 @@
 
 #include "CellularHelper.h"
 
+// This check is here so it can be a library dependency for a library that's compiled for both
+// cellular and Wi-Fi.
 #if Wiring_Cellular
+
+// When using system firmware 0.6.0RC1 or later, use the actual Log object, but for older
+// versions just add a dummy class that does nothing so the code will compile.
+#ifndef SYSTEM_VERSION_060RC1
+class LogClass {
+public:
+	inline void info(const char *fmt, ...) {
+		// This is used in the unit test, not running on an actual device
+		/*
+		va_list ap;
+		va_start(ap, fmt);
+		vprintf(fmt, ap);
+		va_end(ap);
+		printf("\n");
+		*/
+	}
+};
+static LogClass Log;
+#endif
 
 CellularHelperClass CellularHelper;
 
@@ -202,7 +223,6 @@ int CellularHelperEnvironmentResponse::parse(int type, const char *buf, int len)
 	if (enableDebug) {
 		logCellularDebug(type, buf, len);
 	}
-
 
 	if (type == TYPE_UNKNOWN || type == TYPE_PLUS) {
 		// We get this for AT+CGED=5

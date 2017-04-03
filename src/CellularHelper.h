@@ -144,20 +144,45 @@ public:
  */
 class CellularHelperClass {
 public:
+	/**
+	 * Returns a string, typically "u-blox"
+	 */
 	String getManufacturer() const;
 
+	/**
+	 * Returns a string like "SARA-G350", "SARA-U260" or "SARA-U270"
+	 *
+	 */
 	String getModel() const;
 
+	/**
+	 * Returns a tring like "SARA-U260-00S-00".
+	 */
 	String getOrderingCode() const;
 
+	/**
+	 * Returns a string like "23.20"
+	 */
 	String getFirmwareVersion() const;
 
+	/**
+	 * Returns the IMEI for the modem
+	 */
 	String getIMEI() const;
 
+	/**
+	 * Returns the IMSI for the modem
+	 */
 	String getIMSI() const;
 
+	/**
+	 * Returns the IMEI for the SIM card
+	 */
 	String getICCID() const;
 
+	/**
+	 * Returns the operator name string, something like "AT&T" or "T-Mobile" in the United States.
+	 */
 	String getOperatorName(int operatorNameType = OPERATOR_NAME_LONG_EONS) const;
 
 
@@ -169,9 +194,19 @@ public:
 	CellularHelperRSSIQualResponse getRSSIQual() const;
 
 
+	/**
+	 * Gets cell tower information
+	 *
+	 * mode is:
+	 * ENVIRONMENT_SERVING_CELL - only the cell you're connected to
+	 * ENVIRONMENT_SERVING_CELL_AND_NEIGHBORS - note: only works on Electron 2G G350, not 3G models
+	 */
 	void getEnvironment(int mode, CellularHelperEnvironmentResponse &resp) const;
 
 
+	/**
+	 * Gets the location coordinates using the CellLocate feature of the u-blox modem
+	 */
 	CellularHelperLocationResponse getLocation(unsigned long timeoutMs = DEFAULT_TIMEOUT) const;
 
 	/**
@@ -187,11 +222,17 @@ public:
 	 */
 	IPAddress dnsLookup(const char *hostname) const;
 
+	/**
+	 * Used internally to add data to a String object with buffer and length,
+	 * which is not one of the built-in overloads for String. This format is
+	 * what comes from the Cellular.command callbacks.
+	 */
 	void appendBufferToString(String &str, const char *buf, int len, bool noEOL = true) const;
 
 	// Default timeout in milliseconds
 	static const system_tick_t DEFAULT_TIMEOUT = 10000;
 
+	// Mode constants for getEnvironment
 	static const int ENVIRONMENT_SERVING_CELL = 3;
 	static const int ENVIRONMENT_SERVING_CELL_AND_NEIGHBORS = 5;
 
