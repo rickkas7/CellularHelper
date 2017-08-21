@@ -59,7 +59,7 @@ void CellularHelperCommonResponse::logCellularDebug(int type, const char *buf, i
 		break;
 
 	case TYPE_BUSY:
-		typeStr = "TYPE_NODIALTONE";
+		typeStr = "TYPE_BUSY";
 		break;
 
 	case TYPE_NOANSWER:
