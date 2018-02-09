@@ -327,60 +327,71 @@ bool CellularHelperEnvironmentCellData::isValid(bool ignoreCI) const {
 
 
 void CellularHelperEnvironmentCellData::addKeyValue(const char *key, const char *value) {
-	if (strcmp(key, "RAT") == 0) {
+	char ucCopy[16];
+	if (strlen(key) > (sizeof(ucCopy) - 1)) {
+		Log.info("key too long key=%s value=%s", key, value);
+		return;
+	}
+	size_t ii = 0;
+	for(; key[ii]; ii++) {
+		ucCopy[ii] = toupper(key[ii]);
+	}
+	ucCopy[ii] = 0;
+
+	if (strcmp(ucCopy, "RAT") == 0) {
 		isUMTS = (strstr(value, "UMTS") != NULL);
 	}
 	else
-	if (strcmp(key, "MCC") == 0) {
+	if (strcmp(ucCopy, "MCC") == 0) {
 		mcc = atoi(value);
 	}
 	else
-	if (strcmp(key, "MNC") == 0) {
+	if (strcmp(ucCopy, "MNC") == 0) {
 		mnc = atoi(value);
 	}
 	else
-	if (strcmp(key, "LAC") == 0) {
+	if (strcmp(ucCopy, "LAC") == 0) {
 		lac = (int) strtol(value, NULL, 16); // hex
 	}
 	else
-	if (strcmp(key, "CI") == 0) {
+	if (strcmp(ucCopy, "CI") == 0) {
 		ci = (int) strtol(value, NULL, 16); // hex
 	}
 	else
-	if (strcmp(key, "BSIC") == 0) {
+	if (strcmp(ucCopy, "BSIC") == 0) {
 		bsic = (int) strtol(value, NULL, 16); // hex
 	}
 	else
-	if (strcmp(key, "Arfcn") == 0) {
+	if (strcmp(ucCopy, "ARFCN") == 0) { // Usually "Arfcn"
 		// Documentation says this is hex, but this does not appear to be the case!
 		// arfcn = (int) strtol(value, NULL, 16); // hex
 		arfcn = atoi(value);
 	}
 	else
-	if (strcmp(key, "Arfcn_ded") == 0 || strcmp(key, "RxLevSub") == 0 || strcmp(key, "t_adv") == 0) {
-		// Ignored 2G fields
+	if (strcmp(ucCopy, "ARFCN_DED") == 0 || strcmp(ucCopy, "RXLEVSUB") == 0 || strcmp(ucCopy, "T_ADV") == 0) {
+		// Ignored 2G fields: Arfcn_ded, RxLevSub, t_adv
 	}
 	else
-	if (strcmp(key, "RxLev") == 0 || strcmp(key, "RXLEV") == 0) {
+	if (strcmp(ucCopy, "RXLEV") == 0) { // Sometimes RxLev
 		rxlev = (int) strtol(value, NULL, 16); // hex
 	}
 	else
-	if (strcmp(key, "DLF") == 0) {
+	if (strcmp(ucCopy, "DLF") == 0) {
 		dlf = atoi(value);
 	}
 	else
-	if (strcmp(key, "ULF") == 0) {
+	if (strcmp(ucCopy, "ULF") == 0) {
 		ulf = atoi(value);
 
 		// For AT+COPS=5, we don't get a RAT, but if ULF is present it's 3G
 		isUMTS = true;
 	}
 	else
-	if (strcmp(key, "RSCP LEV") == 0) {
+	if (strcmp(ucCopy, "RSCP LEV") == 0) {
 		rscpLev = atoi(value);
 	}
 	else
-	if (strcmp(key, "RAC") == 0 || strcmp(key, "SC") == 0 || strcmp(key, "ECN0 LEV") == 0) {
+	if (strcmp(ucCopy, "RAC") == 0 || strcmp(ucCopy, "SC") == 0 || strcmp(ucCopy, "ECN0 LEV") == 0) {
 		// We get these with AT+COPS=5, but we don't need the values
 	}
 	else {
