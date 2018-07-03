@@ -1,0 +1,6 @@
+- build: examples/1-simple
+  electron: [0.6.4, 0.7.0, 0.8.0-rc.8]
+- build: examples/2-show-carriers
+  electron: [latest]
+
+   
