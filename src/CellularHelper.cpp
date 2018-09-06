@@ -739,6 +739,37 @@ CellularHelperRSSIQualResponse CellularHelperClass::getRSSIQual() const {
 	return resp;
 }
 
+bool CellularHelperClass::selectOperator(const char *mccMnc) const {
+	CellularHelperStringResponse resp;
+
+	int respCode;
+
+	if (mccMnc == NULL) {
+		// Reset back to automatic mode
+		respCode = Cellular.command(responseCallback, (void *)&resp, DEFAULT_TIMEOUT, "AT+COPS=0\r\n");
+		return (respCode == RESP_OK);
+	}
+
+	String curMccMnc = CellularHelper.getOperatorName(0); // 0 = MCC/MNC
+	if (strcmp(mccMnc, curMccMnc.c_str()) == 0) {
+		// Operator already selected; nothing to do
+		Log.info("operator already %s", mccMnc);
+		return true;
+	}
+
+	if (curMccMnc.length() != 0) {
+		// Disconnect from the current operator if there is an operator set.
+		// On cold boot there won't be a name set and the string will be empty
+		respCode = Cellular.command(responseCallback, (void *)&resp, DEFAULT_TIMEOUT, "AT+COPS=2\r\n");
+	}
+
+	// Connect
+	respCode = Cellular.command(responseCallback, (void *)&resp, 60000, "AT+COPS=4,2,\"%s\"\r\n", mccMnc);
+
+	return (respCode == RESP_OK);
+}
+
+
 void CellularHelperClass::getEnvironment(int mode, CellularHelperEnvironmentResponse &resp) const {
 	resp.command = "CGED";
 	// resp.enableDebug = true;

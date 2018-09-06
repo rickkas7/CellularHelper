@@ -194,6 +194,27 @@ public:
 	 */
 	CellularHelperRSSIQualResponse getRSSIQual() const;
 
+	/**
+	 * @brief Select the mobile operator (in areas where more than 1 carrier is supported by the SIM)
+	 *
+	 * @param mccMnc The MCC/MNC numeric string to identify the carrier. For example:
+	 * 310410 = AT&T
+	 * 310260 = T-Mobile
+	 *
+	 * @return true on success or false on error
+	 *
+	 * You must turn cellular on before making this call, but it's most efficient if you don't Cellular.connect()
+	 * or Particle.connect(). You should use SYSTEM_MODE(SEMI_AUTOMATIC) or SYSTEM_MODE(MANUAL).
+	 *
+	 * If the selected carrier matches, this function return true quickly.
+	 *
+	 * If the carrier needs to be changed it may take 15 seconds or longer for the operation to complete.
+	 *
+	 * Omitting the mccMnc parameter or passing NULL will reset the default automatic mode.
+	 *
+	 * This setting is stored in the modem but reset on power down, so you should reset it from setup().
+	 */
+	bool selectOperator(const char *mccMnc = NULL) const;
 
 	/**
 	 * Gets cell tower information
