@@ -644,6 +644,32 @@ String CellularHelperLocationResponse::toString() const {
 	}
 }
 
+void CellularHelperCREGResponse::postProcess() {
+	// "\r\n+CREG: 2,1,\"FFFE\",\"C45C010\",8\r\n"
+	int n;
+
+	if (sscanf(string.c_str(), "%d,%d,\"%x\",\"%x\",%d", &n, &stat, &lac, &ci, &rat) == 5) {
+		// SARA-R4 does include the n (5 parameters)
+		valid = true;
+	}
+	else
+	if (sscanf(string.c_str(), "%d,\"%x\",\"%x\",%d", &stat, &lac, &ci, &rat) == 4) {
+		// SARA-U and SARA-G don't include the n (4 parameters)
+		valid = true;
+	}
+
+}
+
+String CellularHelperCREGResponse::toString() const {
+	if (valid) {
+		return String::format("stat=%d lac=0x%x ci=0x%x rat=%d", stat, lac, ci, rat);
+	}
+	else {
+		return "valid=false";
+	}
+}
+
+
 String CellularHelperClass::getManufacturer() const {
 	CellularHelperStringResponse resp;
 
@@ -700,6 +726,11 @@ String CellularHelperClass::getICCID() const {
 
 	return resp.string;
 }
+
+bool CellularHelperClass::isLTE() const {
+	return getModel().startsWith("SARA-R4");
+}
+
 
 String CellularHelperClass::getOperatorName(int operatorNameType) const {
 	String result;
@@ -814,6 +845,22 @@ CellularHelperLocationResponse CellularHelperClass::getLocation(unsigned long ti
 	}
 
 	return resp;
+}
+
+void CellularHelperClass::getCREG(CellularHelperCREGResponse &resp) const {
+	int tempResp;
+
+	tempResp = Cellular.command(DEFAULT_TIMEOUT, "AT+CREG=2\r\n");
+	if (tempResp == RESP_OK) {
+		resp.command = "CREG";
+		resp.resp = Cellular.command(responseCallback, (void *)&resp, DEFAULT_TIMEOUT, "AT+CREG?\r\n");
+		if (resp.resp == RESP_OK) {
+			resp.postProcess();
+
+			// Set back to default
+			tempResp = Cellular.command(DEFAULT_TIMEOUT, "AT+CREG=0\r\n");
+		}
+	}
 }
 
 

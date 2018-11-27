@@ -167,15 +167,16 @@ if (addr)
 
 Or when printed as above, will be 0.0.0.0.
 
+## Examples
 
-## 1-Simple Demo
+### 1-Simple Demo
 
 The simple demo tests all of the basic functions in the library, displaying the results to USB serial.
 
 The code examples in this document were taken from this example.
 
 
-## 2-Show Carriers Demo
+### 2-Show Carriers Demo
 
 This is a demo program that uses the cellular modem to scan for available operators, frequency band used, and signal strength. It prints a result like this to USB serial:
 
@@ -200,7 +201,7 @@ Then you can flash it to your Electron in DFU mode (blinking yellow):
 particle flash --usb firmware.bin
 ```
 
-## 3-Select Carrier Demo
+### 3-Select Carrier Demo
 
 The 3-select-carrier example shows how to prefer a certain carrier when multiple carriers are supported by the SIM card.
 
@@ -250,3 +251,14 @@ If you do a warm boot after setting:
 0000002527 [app] INFO: operator already 310260
 0000002527 [app] INFO: selectOperator returned 1
 ```
+
+### 4-Test CREG
+
+Simple test of the CREG command, used to get the CI and LAC information on LTE devices (SARA-R410). It also works on the SARA-U and SARA-G.
+
+## Version History
+
+0.0.7 (2018-11-27) Added the getCREG call
+0.0.6 Added selectOperator
+
+

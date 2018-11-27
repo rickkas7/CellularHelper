@@ -139,6 +139,17 @@ public:
 	String toString() const;
 };
 
+class CellularHelperCREGResponse :  public CellularHelperPlusStringResponse {
+public:
+	bool valid = false;
+	int stat = 0;
+	int lac = 0xFFFF;
+	int ci = 0xFFFFFFFF;
+	int rat = 0;
+
+	void postProcess();
+	String toString() const;
+};
 
 /**
  * Class for calling the u-blox SARA modem directly
@@ -182,10 +193,14 @@ public:
 	String getICCID() const;
 
 	/**
+	 * Returns true if the device is LTE (SARA-R4 at this time)
+	 */
+	bool isLTE() const;
+
+	/**
 	 * Returns the operator name string, something like "AT&T" or "T-Mobile" in the United States.
 	 */
 	String getOperatorName(int operatorNameType = OPERATOR_NAME_LONG_EONS) const;
-
 
 	/**
 	 * Get the RSSI and qual values for the receiving cell site.
@@ -230,6 +245,14 @@ public:
 	 * Gets the location coordinates using the CellLocate feature of the u-blox modem
 	 */
 	CellularHelperLocationResponse getLocation(unsigned long timeoutMs = DEFAULT_TIMEOUT) const;
+
+	/**
+	 * Gets the AT+CREG (registration info including CI and LAC) as an alternative to AT+CGED for SARA-R4 (LTE)
+	 *
+	 * Also works on the SARA-G and SARA-U and is more efficient than getEnvironment(3) (AT+CGED) if you only need the
+	 * CI and LAC and not all of the other information.
+	 */
+	void getCREG(CellularHelperCREGResponse &resp) const;
 
 	/**
 	 * Pings an address. Typically a dotted octet string, but can pass a hostname as well.
