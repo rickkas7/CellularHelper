@@ -104,7 +104,7 @@ int CellularHelperStringResponse::parse(int type, const char *buf, int len) {
 		logCellularDebug(type, buf, len);
 	}
 	if (type == TYPE_UNKNOWN) {
-		CellularHelper::appendBufferToString(string, buf, len, true);
+		CellularHelperClass::appendBufferToString(string, buf, len, true);
 	}
 	return WAIT;
 }
@@ -132,7 +132,7 @@ int CellularHelperPlusStringResponse::parse(int type, const char *buf, int len) 
 				start += strlen(searchFor);
 
 				char *end = strchr(start, '\r');
-				CellularHelper::appendBufferToString(string, start, end - start);
+				CellularHelperClass::appendBufferToString(string, start, end - start);
 				//Log.info("found %s", string.c_str());
 			}
 			else {
@@ -912,7 +912,7 @@ CellularHelperRSSIQualResponse CellularHelperClass::getRSSIQual() const {
 	return resp;
 }
 
-CellularHelperExtendedQualResponse CellularHelperClass::getExtendedQualResponse() const {
+CellularHelperExtendedQualResponse CellularHelperClass::getExtendedQual() const {
 	CellularHelperExtendedQualResponse resp;
 	resp.command = "CESQ";
 
@@ -1022,7 +1022,7 @@ void CellularHelperClass::getCREG(CellularHelperCREGResponse &resp) const {
 // There isn't an overload of String that takes a buffer and length, but that's what comes back from
 // the Cellular.command callback, so that's why this method exists.
 // [static]
-void CellularHelperClass::appendBufferToString(String &str, const char *buf, int len, bool noEOL) const {
+void CellularHelperClass::appendBufferToString(String &str, const char *buf, int len, bool noEOL) {
 	str.reserve(str.length() + (size_t)len + 1);
 	for(int ii = 0; ii < len; ii++) {
 		if (!noEOL || (buf[ii] != '\r' && buf[ii] != '\n')) {

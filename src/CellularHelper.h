@@ -983,7 +983,7 @@ public:
 	 * 
 	 * @param noEOL (default: true) If true, don't copy CR and LF characters to the output.
 	 */
-	static void appendBufferToString(String &str, const char *buf, int len, bool noEOL = true) const;
+	static void appendBufferToString(String &str, const char *buf, int len, bool noEOL = true);
 
 	/**
 	 * @brief Default timeout in milliseconds. Passed to Cellular.command().
