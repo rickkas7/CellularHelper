@@ -1,8 +1,7 @@
 # Cellular Helper
 
-**A library to access useful things from the Electron cellular modem**
+**A library to access useful things from the Electron, E Series, Boron, and B Series cellular modem**
 
-This library uses the Logging functionality, so it can only be used with system firmware 0.6.0 and later. It also can only be used on an Electron, not a Photon/P1/Core, for obvious reasons.
 
 ## Simple functions
 
@@ -35,16 +34,18 @@ These are all just various bits of data from the modem or the SIM card.
 
 You might find the ICCID (SIM Number) to be useful as well.
 
-Cellular.on needs to have been called, which will be for automatic mode. 
+`Cellular.on()` needs to have been called, which happens automatically in automatic mode (the default).
 
-Note that if you are using threaded mode with semi-automatic or manual mode you must also wait after turning the modem on. 4 seconds should be sufficient, because Cellular.on() is asynchronous and there's no call to determine if has completed yet.
+Note that if you are using `SYSTEM_THREAD(ENABLED)` or `SYSTEM_MODE(SEMI_AUTOMATIC)` or `SYSTEM_MODE(MANUAL)` you must also wait after turning the modem on. 4 seconds should be sufficient, because `Cellular.on()` is asynchronous and there's no call to determine if has completed yet. Instead of a delay, you could also use `cellular_on(NULL)` which blocks until the modem is turned on.
 
 
 ## Cellular connection functions
 
+For full information about these commands, consult the API documentation which describes these functions in much more detail.
+
 These functions can only be used after connecting to the cellular network.
 
-### getOperatorName
+### getOperatorName (2G/3G only)
 
 Returns a string containing the operator name, for example AT&T or T-Mobile in the United States.
 
@@ -57,6 +58,8 @@ Example output:
 ```
 0000008574 [app] INFO: operator name=AT&T
 ```
+
+The operator name is not available on LTE Cat M1 devices (SARA-R410M-02-B).
 
 ### getRSSIQual
 
@@ -75,14 +78,15 @@ Log.info("rssi=%d, qual=%d, bars=%d", rssiQual.rssi, rssiQual.qual, bars);
 
 The RSSI is in dBm, the standard measure of signal strength. It's a negative value, and values closer to 0 are higher signal strength.
 
-The quality value is 0 (highest quality) to 7 (lowest quality) or 99 if the value unknown. It's typically 99 for 2G connections. The qual value is described in the u-blox documenation, and it's returned by the call, but you probably won't need to use it.
+The quality value is 0 (highest quality) to 7 (lowest quality) or 99 if the value unknown. It's typically 99 for 2G connections. The qual value is described in the u-blox documentation, and it's returned by the call, but you probably won't need to use it.
 
-The rssiToBars() method converts the RSSI to a 0 to 5 bars, where 5 is the strongest signal.
+The `rssiToBars()` method converts the RSSI to a 0 to 5 bars, where 5 is the strongest signal.
 
+The `CellularHelper.getExtendedQualResponse()` is available on LTE Cat M1 devices and returns LTE specific parameters like the RSRP.
 
-### getEnvironment
+### getEnvironment (2G/3G only)
 
-The method getEnvironment returns cell tower information. The is the u-blox AT+CGED comamnd.
+The method getEnvironment returns cell tower information. The is the u-blox AT+CGED command.
 
 ```
 CellularHelperEnvironmentResponseStatic<8> envResp;
@@ -110,7 +114,7 @@ This sample just prints the information to serial debug:
 
 Note that the rssi will always be 0 for 3G towers. This information is only returned by the AT+CGED command for 2G towers. You can use getRSSIQual() to get the RSSI for the connected tower; that works for 3G.
 
-### getLocation
+### getLocation (2G/3G only)
 
 This function returns the location of the Electron, using cell tower location. This call may take 10 seconds to complete!
 
@@ -126,46 +130,7 @@ The locResp contains the member variables:
 - alt - The altitude (in meters)
 - uncertainty - The radius of the circle of uncertainty (in meters)
 	
-
-## Miscellaneous Utilities
-
-These are just handy functions.
-
-### ping
-
-Uses the ping function (ICMP echo) to determine if a server on the Internet is accessible. Not all servers respond to ping. The function returns true if the ping is responded to. Only one attempt is made.
-
-```
-Log.info("ping 8.8.8.8=%d", CellularHelper.ping("8.8.8.8"));
-```
-
-Result:
-
-```
-0000014927 [app] INFO: ping 8.8.8.8=1
-```
-
-### dnsLookup
-
-This does a DNS (domain name service) hostname lookup and returns an IP address for that server.
-
-```
-Log.info("dns device.spark.io=%s", CellularHelper.dnsLookup("device.spark.io").toString().c_str());
-```
-
-Result:
-
-```
-0000015857 [app] INFO: dns device.spark.io=54.225.2.62
-```
-
-If the host name cannot be resolved (does not exist or no DNS available) then the empty IP address is returned. This can be tested for by checking:
-
-```
-if (addr)
-```
-
-Or when printed as above, will be 0.0.0.0.
+This only works on 2G/3G devices, and a better alternative in most cases is to use the google-maps-device-locator to do the location query on the cloud-side instead of on-device. 
 
 ## Examples
 
@@ -187,12 +152,12 @@ This is a demo program that uses the cellular modem to scan for available operat
 
 It should work even when you can't connect to a tower and also display carriers that are not supported by your SIM. (It only displays carriers compatible with the GSM modem, however, so it won't, for example, display Verizon in the United States since that requires a PCS modem.)
 
-This is a very time consuming operation (it can take 2 minutes or longer to run) and it's pretty rarely needed, so it builds on the CellularHelper library but the commands it uses (COPS and COPN) are not part of the library itself because they're so rarely needed.
+This is a very time consuming operation (it can take 2 minutes or longer to run) and it's pretty rarely needed, so it builds on the CellularHelper library but the commands it uses (AT+COPS and AT+COPN) are not part of the library itself because they're so rarely needed.
 
 To build a binary for this, you can download the repository and use the Particle CLI compiler from the top level of it:
 
 ```
-particle compile electron examples/2-show-carriers/ --saveTo firmware.bin --target 0.6.0
+particle compile electron examples/2-show-carriers/ --saveTo firmware.bin 
 ```
 
 Then you can flash it to your Electron in DFU mode (blinking yellow):
@@ -252,13 +217,35 @@ If you do a warm boot after setting:
 0000002527 [app] INFO: selectOperator returned 1
 ```
 
-### 4-Test CREG
+### 4-cell-locate
 
-Simple test of the CREG command, used to get the CI and LAC information on LTE devices (SARA-R410). It also works on the SARA-U and SARA-G.
+This demo uses the u-blox Cell Locate feature to find the latitude, longitude, and elevation of the device.
+
+This only works on 2G and 3G devices, not LTE Cat M1. Another alternative is to use google-maps-device-locator 
+which works on all devices, and is also generally much faster.
+
+### 5-cellular-global-identity
+
+Previously getting the cell tower information required a variety of techniques that depended on the cellular 
+modem and generation of device. In Device OS 1.2.1 and later, it's now easy to query this information from
+Device OS. This example shows how.
 
 ## Version History
 
-0.0.7 (2018-11-27) Added the getCREG call
-0.0.6 Added selectOperator
+#### 0.1.0 (2020-02-13)
+
+- Code cleanup
+- Minimum Device OS version is now 0.7.0 
+- Removed non-working ping and DNS calls
+- Added lots of API documentation
+
+#### 0.0.7 (2018-11-27) 
+
+- Added the getCREG call
+- Last versions that supports Device OS 0.6.x
+
+#### 0.0.6 
+
+- Added selectOperator
 
 

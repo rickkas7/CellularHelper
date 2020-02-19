@@ -6,7 +6,10 @@
 SYSTEM_MODE(MANUAL);
 SYSTEM_THREAD(ENABLED);
 
+// For extra debugging, use the LOG_LEVEL_TRACE version instead
 SerialLogHandler logHandler;
+// SerialLogHandler logHandler(LOG_LEVEL_TRACE);
+
 
 const unsigned long STARTUP_WAIT_TIME_MS = 4000;
 const unsigned long MODEM_ON_WAIT_TIME_MS = 4000;
@@ -220,6 +223,10 @@ void runCellularTests() {
 
 	Log.info("rssi=%d, qual=%d, bars=%d", rssiQual.rssi, rssiQual.qual, bars);
 
+	
+	CellularHelperExtendedQualResponse extQual = CellularHelper.getExtendedQual();
+	Log.info("extended qual %s (LTE-M1 only)", extQual.toString().c_str());
+
 	// First try to get info on neighboring cells. This doesn't work for me using the U260.
 	// Get a maximum of 8 responses
 	CellularHelperEnvironmentResponseStatic<8> envResp;
@@ -229,15 +236,16 @@ void runCellularTests() {
 		// We couldn't get neighboring cells, so try just the receiving cell
 		CellularHelper.getEnvironment(CellularHelper.ENVIRONMENT_SERVING_CELL, envResp);
 	}
-	envResp.logResponse();
-
+	if (envResp.resp == RESP_OK) {
+		envResp.logResponse();
+	}
+	else {
+		Log.info("could not get cellular environment (normal for LTE M1)");
+	}
 
 	CellularHelperLocationResponse locResp = CellularHelper.getLocation();
 	Log.info(locResp.toString());
 
-	Log.info("ping 8.8.8.8=%d", CellularHelper.ping("8.8.8.8"));
-
-	Log.info("dns device.spark.io=%s", CellularHelper.dnsLookup("device.spark.io").toString().c_str());
 }
 
 void buttonHandler(system_event_t event, int param) {

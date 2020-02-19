@@ -1,1 +1,7 @@
 firmware*.bin
+.vscode
+.DS_Store
+docs/latex
+docs/xml
+project.properties
+

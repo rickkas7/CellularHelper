@@ -1,6 +1,13 @@
 - build: examples/1-simple
-  electron: [0.6.4, 0.7.0, 0.8.0-rc.8]
+  electron: [0.7.0, 1.0.0, 1.4.4, latest]
+  boron: [latest]
 - build: examples/2-show-carriers
   electron: [latest]
-
-   
+- build: examples/3-select-carriers
+  electron: [latest]
+- build: examples/4-cell-locate
+  electron: [latest]
+- build: examples/5-cellular-global-identity
+  electron: [1.2.1, latest]
+- build: examples/6-no-cellular-test
+  photon: [latest]

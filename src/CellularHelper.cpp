@@ -6,24 +6,6 @@
 // cellular and Wi-Fi.
 #if Wiring_Cellular
 
-// When using system firmware 0.6.0RC1 or later, use the actual Log object, but for older
-// versions just add a dummy class that does nothing so the code will compile.
-#ifndef SYSTEM_VERSION_060RC1
-class LogClass {
-public:
-	inline void info(const char *fmt, ...) {
-		// This is used in the unit test, not running on an actual device
-		/*
-		va_list ap;
-		va_start(ap, fmt);
-		vprintf(fmt, ap);
-		va_end(ap);
-		printf("\n");
-		*/
-	}
-};
-static LogClass Log;
-#endif
 
 CellularHelperClass CellularHelper;
 
@@ -122,7 +104,7 @@ int CellularHelperStringResponse::parse(int type, const char *buf, int len) {
 		logCellularDebug(type, buf, len);
 	}
 	if (type == TYPE_UNKNOWN) {
-		CellularHelper.appendBufferToString(string, buf, len, true);
+		CellularHelper::appendBufferToString(string, buf, len, true);
 	}
 	return WAIT;
 }
@@ -150,7 +132,7 @@ int CellularHelperPlusStringResponse::parse(int type, const char *buf, int len) 
 				start += strlen(searchFor);
 
 				char *end = strchr(start, '\r');
-				CellularHelper.appendBufferToString(string, start, end - start);
+				CellularHelper::appendBufferToString(string, start, end - start);
 				//Log.info("found %s", string.c_str());
 			}
 			else {
@@ -212,6 +194,41 @@ void CellularHelperRSSIQualResponse::postProcess() {
 	}
 }
 
+String CellularHelperRSSIQualResponse::toString() const {
+	
+	return String::format("rssi=%d qual=%d", rssi, qual);
+}
+
+
+void CellularHelperExtendedQualResponse::postProcess() {
+	int values[6];
+
+	if (sscanf(string.c_str(), "%d,%d,%d,%d,%d,%d", &values[0], &values[1], &values[2], &values[3], &values[4], &values[5]) == 6) {
+
+		rxlev = (uint8_t) values[0];
+		ber = (uint8_t) values[1];
+		rscp = (uint8_t) values[2];
+		ecn0 = (uint8_t) values[3];
+		rsrq = (uint8_t) values[4];
+		rsrp = (uint8_t) values[5];
+		
+
+		resp = RESP_OK;
+	}
+	else {
+		// Failed to parse result
+		resp = RESP_ERROR;
+	}
+}
+
+String CellularHelperExtendedQualResponse::toString() const {
+	
+	return String::format("rxlev=%d ber=%d rscp=%d ecn0=%d rsrq=%d rsrp=%d", (int)rxlev, (int)ber, (int)rscp, (int)ecn0, (int)rsrq, (int)rsrp);
+}
+
+
+CellularHelperEnvironmentResponse::CellularHelperEnvironmentResponse() :neighbors(0), numNeighbors(0) {
+}
 
 CellularHelperEnvironmentResponse::CellularHelperEnvironmentResponse(CellularHelperEnvironmentCellData *neighbors, size_t numNeighbors) :
 	neighbors(neighbors), numNeighbors(numNeighbors) {
@@ -405,45 +422,174 @@ int CellularHelperEnvironmentCellData::getBand() const {
 
 	if (isUMTS) {
 		// 3G radio
-		if (ulf >= 0 && ulf <= 124) {
-			freq = 900;
-		}
-		else
-		if (ulf >= 128 && ulf <= 251) {
-			freq = 850;
-		}
-		else
-		if (ulf >= 512 && ulf <= 885) {
-			freq = 1800;
-		}
-		else
-		if (ulf >= 975 && ulf <= 1023) {
-			freq = 900;
-		}
-		else
-		if (ulf >= 1312 && ulf <= 1513) {
-			freq = 1700;
-		}
-		else
-		if (ulf >= 2712 && ulf <= 2863) {
-			freq = 900;
-		}
-		else
-		if (ulf >= 4132 && ulf <= 4233) {
-			freq = 850;
-		}
-		else
-		if ((ulf >= 4162 && ulf <= 4188) || (ulf >= 20312 && ulf <= 20363)) {
+
+		// There are a bunch of special cases:
+		switch(ulf) {
+		case 12:
+		case 37:
+		case 62:
+		case 87:
+		case 112:
+		case 137:
+		case 162:
+		case 187:
+		case 212:
+		case 237:
+		case 262:
+		case 287:
+			freq = 1900; // PCS A-F
+			break;
+
+		case 1662:
+		case 1687:
+		case 1712:
+		case 1737:
+		case 1762:
+		case 1787:
+		case 1812:
+		case 1837:
+		case 1862:
+			freq = 1700; // AWS A-F
+			break;
+
+		case 782:
+		case 787:
+		case 807:
+		case 812:
+		case 837:
+		case 862:
+			freq = 850; // CLR
+			break;
+
+		case 2362:
+		case 2387:
+		case 2412:
+		case 2437:
+		case 2462:
+		case 2487:
+		case 2512:
+		case 2537:
+		case 2562:
+		case 2587:
+		case 2612:
+		case 2637:
+		case 2662:
+		case 2687:
+			freq = 2600; // IMT-E
+			break;
+
+		case 3187:
+		case 3212:
+		case 3237:
+		case 3262:
+		case 3287:
+		case 3312:
+		case 3337:
+		case 3362:
+		case 3387:
+		case 3412:
+		case 3437:
+		case 3462:
+			freq = 1700; // EAWS A-G
+			break;
+
+		case 3707:
+		case 3732:
+		case 3737:
+		case 3762:
+		case 3767:
+			freq = 700; // LSMH A/B/C
+			break;
+
+		case 3842:
+		case 3867:
+			freq = 700; // USMH C
+			break;
+
+		case 3942:
+		case 3967:
+			freq = 700; // USMH D
+
+		case 387:
+		case 412:
+		case 437:
 			freq = 800;
+			break;
+
+		case 6067:
+		case 6092:
+		case 6117:
+		case 6142:
+		case 6167:
+		case 6192:
+		case 6217:
+		case 6242:
+		case 6267:
+		case 6292:
+		case 6317:
+		case 6342:
+		case 6367:
+			freq = 1900; // EPCS A-G
+			break;
+
+		case 5712:
+		case 5737:
+		case 5762:
+		case 5767:
+		case 5787:
+		case 5792:
+		case 5812:
+		case 5817:
+		case 5837:
+		case 5842:
+		case 5862:
+			freq = 850; // ECLR
+			break;
+
+		default:
+			if (ulf >= 0 && ulf <= 124) {
+				freq = 900;
+			}
+			else
+			if (ulf >= 128 && ulf <= 251) {
+				freq = 850;
+			}
+			else
+			if (ulf >= 512 && ulf <= 885) {
+				freq = 1800;
+			}
+			else
+			if (ulf >= 975 && ulf <= 1023) {
+				freq = 900;
+			}
+			else
+			if (ulf >= 1312 && ulf <= 1513) {
+				freq = 1700;
+			}
+			else
+			if (ulf >= 2712 && ulf <= 2863) {
+				freq = 900;
+			}
+			else
+			if (ulf >= 4132 && ulf <= 4233) {
+				freq = 850;
+			}
+			else
+			if ((ulf >= 4162 && ulf <= 4188) || (ulf >= 20312 && ulf <= 20363)) {
+				freq = 800;
+			}
+			else
+			if (ulf >= 9262 && ulf <= 9538) {
+				freq = 1900;
+			}
+			else
+			if (ulf >= 9612 && ulf <= 9888) {
+				freq = 2100;
+			}
+			break;
 		}
-		else
-		if (ulf >= 9262 && ulf <= 9538) {
-			freq = 1900;
-		}
-		else
-		if (ulf >= 9612 && ulf <= 9888) {
-			freq = 2100;
-		}
+
+
 	}
 	else {
 		// 2G, use arfcn
@@ -554,10 +700,6 @@ String CellularHelperEnvironmentCellData::toString() const {
 
 void CellularHelperEnvironmentResponse::clear() {
 	curDataIndex = -1;
-}
-
-
-void CellularHelperEnvironmentResponse::postProcess() {
 }
 
 
@@ -727,7 +869,7 @@ String CellularHelperClass::getICCID() const {
 	return resp.string;
 }
 
-bool CellularHelperClass::isLTE() const {
+bool CellularHelperClass::isSARA_R4() const {
 	return getModel().startsWith("SARA-R4");
 }
 
@@ -755,7 +897,7 @@ String CellularHelperClass::getOperatorName(int operatorNameType) const {
 /**
  * Get the RSSI and qual values for the receiving cell site.
  *
- * The qual value is always 99 for me on the G350 (2G).
+ * The qual value is always 99 for me on the G350 (2G) and LTE-M1
  */
 CellularHelperRSSIQualResponse CellularHelperClass::getRSSIQual() const {
 	CellularHelperRSSIQualResponse resp;
@@ -769,6 +911,20 @@ CellularHelperRSSIQualResponse CellularHelperClass::getRSSIQual() const {
 
 	return resp;
 }
+
+CellularHelperExtendedQualResponse CellularHelperClass::getExtendedQualResponse() const {
+	CellularHelperExtendedQualResponse resp;
+	resp.command = "CESQ";
+
+	resp.resp = Cellular.command(responseCallback, (void *)&resp, DEFAULT_TIMEOUT, "AT+CESQ\r\n");
+
+	if (resp.resp == RESP_OK) {
+		resp.postProcess();
+	}
+
+	return resp;
+}
+
 
 bool CellularHelperClass::selectOperator(const char *mccMnc) const {
 	CellularHelperStringResponse resp;
@@ -806,9 +962,7 @@ void CellularHelperClass::getEnvironment(int mode, CellularHelperEnvironmentResp
 	// resp.enableDebug = true;
 
 	resp.resp = Cellular.command(responseCallback, (void *)&resp, DEFAULT_TIMEOUT, "AT+CGED=%d\r\n", mode);
-	if (resp.resp == RESP_OK) {
-		resp.postProcess();
-	}
+	
 }
 
 CellularHelperLocationResponse CellularHelperClass::getLocation(unsigned long timeoutMs) const {
@@ -864,37 +1018,10 @@ void CellularHelperClass::getCREG(CellularHelperCREGResponse &resp) const {
 }
 
 
-bool CellularHelperClass::ping(const char *addr) const {
-	CellularHelperStringResponse resp;
-
-	resp.resp = Cellular.command(responseCallback, (void *)&resp, DEFAULT_TIMEOUT, "AT+UPING=\"%s\"\r\n", addr);
-
-	return resp.resp == RESP_OK;
-}
-
-IPAddress CellularHelperClass::dnsLookup(const char *hostname) const {
-	IPAddress result;
-
-	CellularHelperPlusStringResponse resp;
-	resp.command = "UDNSRN";
-
-	resp.resp = Cellular.command(responseCallback, (void *)&resp, DEFAULT_TIMEOUT, "AT+UDNSRN=0,\"%s\"\r\n", hostname);
-	if (resp.resp == RESP_OK) {
-		String quotedPart = resp.getDoubleQuotedPart();
-		int addr[4];
-		if (sscanf(quotedPart.c_str(), "%u.%u.%u.%u", &addr[0], &addr[1], &addr[2], &addr[3]) == 4) {
-			result = IPAddress(addr[0], addr[1], addr[2], addr[3]);
-		}
-	}
-
-	return result;
-}
-
-
-
 
 // There isn't an overload of String that takes a buffer and length, but that's what comes back from
 // the Cellular.command callback, so that's why this method exists.
+// [static]
 void CellularHelperClass::appendBufferToString(String &str, const char *buf, int len, bool noEOL) const {
 	str.reserve(str.length() + (size_t)len + 1);
 	for(int ii = 0; ii < len; ii++) {
@@ -904,7 +1031,7 @@ void CellularHelperClass::appendBufferToString(String &str, const char *buf, int
 	}
 }
 
-// static
+// [static]
 int CellularHelperClass::rssiToBars(int rssi) {
 	int bars = 0;
 
@@ -918,7 +1045,7 @@ int CellularHelperClass::rssiToBars(int rssi) {
 	return bars;
 }
 
-// static
+// [static]
 int CellularHelperClass::responseCallback(int type, const char* buf, int len, void *param) {
 	CellularHelperCommonResponse *presp = (CellularHelperCommonResponse *)param;
 

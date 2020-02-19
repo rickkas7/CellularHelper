@@ -1,0 +1,21 @@
+This library should work with the following Particle cellular devices:
+
+- Electron 2G (G350)
+- Electron 3G Americas (U260)
+- Electron 3G Europe/Asia/Africa (U270)
+- Electron Global (U201)
+- Electron LTE (R410M)
+
+- E Series 2G/3G (U201)
+- E Series LTE (R410M)
+
+- Boron 2G/3G (U201)
+- Boron LTE (R410M)
+
+- B Series B402 SoM (R410M)
+
+To test the library, run the 1-simple example and monitor the USB debug serial output.
+
+Some features are only supported on some devices. For example, the cell locate 
+example will not run on u-blox SARA-R410M-02B devices (LTE Cat M1).
+
