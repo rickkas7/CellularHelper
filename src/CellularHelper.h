@@ -3,7 +3,7 @@
 
 #include "Particle.h"
 
-#define Wiring_Cellular 1 // TEMPORARY
+
 #if Wiring_Cellular
 
 
