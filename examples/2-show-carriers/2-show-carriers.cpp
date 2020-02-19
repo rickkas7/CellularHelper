@@ -242,7 +242,6 @@ void cellularScan() {
 	// Command may take up to 3 minutes to execute!
 	envResp.resp = Cellular.command(CellularHelperClass::responseCallback, (void *)&envResp, 360000, "AT+COPS=5\r\n");
 	if (envResp.resp == RESP_OK) {
-		envResp.postProcess();
 		envResp.logResponse();
 
 		copnResp.requestOperator(&envResp.service);
