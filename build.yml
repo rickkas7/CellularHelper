@@ -3,7 +3,7 @@
   boron: [latest]
 - build: examples/2-show-carriers
   electron: [latest]
-- build: examples/3-select-carriers
+- build: examples/3-select-carrier
   electron: [latest]
 - build: examples/4-cell-locate
   electron: [latest]
