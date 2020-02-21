@@ -2,6 +2,10 @@
 
 **A library to access useful things from the Electron, E Series, Boron, and B Series cellular modem**
 
+**Note: The official version of this library can now be found at: [https://github.com/particle-iot/CellularHelper](https://github.com/particle-iot/CellularHelper)**
+
+The code here will be archived.
+
 The full API documentation can be [found here](https://rickkas7.github.io/CellularHelper/).
 
 ## Simple functions
