@@ -855,7 +855,7 @@ String CellularHelperClass::getIMEI() const {
 String CellularHelperClass::getIMSI() const {
 	CellularHelperStringResponse resp;
 
-	Cellular.command(responseCallback, (void *)&resp, DEFAULT_TIMEOUT, "AT+CGMI\r\n");
+	Cellular.command(responseCallback, (void *)&resp, DEFAULT_TIMEOUT, "AT+CIMI\r\n");
 
 	return resp.string;
 }
